@@ -11,6 +11,18 @@ import itertools
 
 files_to_compute = []
 
+include: "rules/demmi.smk"
+files_to_compute.extend(["data/processed/paper/valid_days_per_participant.csv"])
+files_to_compute.extend(["data/processed/paper/valid_days_per_group.csv"])
+files_to_compute.extend(["data/processed/paper/summary_stages_per_participant.csv"])
+files_to_compute.extend(["data/processed/paper/summary_stages_per_group.csv"])
+files_to_compute.extend(["data/processed/paper/summary_sad_mood_per_daytime.csv"])
+files_to_compute.extend(["data/processed/paper/mood_global_answer_rate.csv"])
+files_to_compute.extend(["data/processed/paper/summary_sad_mood_per_group.csv"])
+files_to_compute.extend(["data/processed/paper/summary_episodes_per_daytime.csv"])
+files_to_compute.extend(["data/processed/paper/episodes_per_participant.csv"])
+files_to_compute.extend(["data/processed/paper/mood_compliance.csv"])
+
 if len(config["PIDS"]) == 0:
     raise ValueError("Add participants IDs to PIDS in config.yaml. Remember to create their participant files in data/external")
 

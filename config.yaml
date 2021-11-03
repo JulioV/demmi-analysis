@@ -3,11 +3,15 @@
 ########################################################################################################################
 
 # See https://www.rapids.science/latest/setup/configuration/#participant-files
-PIDS: [test01]
+PIDS: [P1, P4, P3, P6, P2, P11, P9, P7, P10, P12, P13, P16, P15, P17, P14, P18, P21, P23, P28, P29, P27, P30, P5, P19, P25, P20, P22, P24]
+
+PIDS_CONTROLS: ["P3", "P4","P10","P11","P12","P13","P14","P15","P16", "P18"]
+PIDS_BE: ["P1","P2","P6","P7","P17", "P21", "P22", "P23", "P25", "P27"]
+PIDS_NAP: [P6,P7,P17,P21,P22,P23,P25,P27] # these IDs correspond to P03BE to P10BE
 
 # See https://www.rapids.science/latest/setup/configuration/#automatic-creation-of-participant-files
 CREATE_PARTICIPANT_FILES:
-  CSV_FILE_PATH: "data/external/example_participants.csv" # see docs for required format
+  CSV_FILE_PATH: "data/external/demmi_pids.csv" # see docs for required format
   PHONE_SECTION:
     ADD: True
     IGNORED_DEVICE_IDS: []
@@ -28,7 +32,7 @@ TIME_SEGMENTS: &time_segments
 TIMEZONE: 
     TYPE: SINGLE
     SINGLE:
-      TZCODE: America/New_York
+      TZCODE: Europe/London
     MULTIPLE:
       TZCODES_FILE: data/external/multiple_timezones_example.csv
       IF_MISSING_TZCODE: STOP
@@ -67,11 +71,11 @@ PHONE_ACCELEROMETER:
       SRC_SCRIPT: src/features/phone_accelerometer/rapids/main.py
     
     PANDA:
-      COMPUTE: False
+      COMPUTE: True
       VALID_SENSED_MINUTES: False
       FEATURES:
-        exertional_activity_episode: ["sumduration", "maxduration", "minduration", "avgduration", "medianduration", "stdduration"]
-        nonexertional_activity_episode: ["sumduration", "maxduration", "minduration", "avgduration", "medianduration", "stdduration"]
+        exertional_activity_episode: ["sumduration", "maxduration"]
+        nonexertional_activity_episode: ["sumduration", "maxduration"]
       SRC_SCRIPT: src/features/phone_accelerometer/panda/main.py
 
 # See https://www.rapids.science/latest/features/phone-activity-recognition/
@@ -82,8 +86,8 @@ PHONE_ACTIVITY_RECOGNITION:
   EPISODE_THRESHOLD_BETWEEN_ROWS: 5 # minutes. Max time difference for two consecutive rows to be considered within the same AR episode.
   PROVIDERS:
     RAPIDS:
-      COMPUTE: False
-      FEATURES: ["count", "mostcommonactivity", "countuniqueactivities", "durationstationary", "durationmobile", "durationvehicle"]
+      COMPUTE: True
+      FEATURES: ["durationstationary", "durationmobile", "durationvehicle"]
       ACTIVITY_CLASSES:
         STATIONARY: ["still", "tilting"]
         MOBILE: ["on_foot", "walking", "running", "on_bicycle"]
@@ -110,18 +114,17 @@ PHONE_APPLICATIONS_FOREGROUND:
     SCRAPE_MISSING_CATEGORIES: False # whether or not to scrape missing genres, only effective if CATALOGUE_SOURCE is equal to FILE. If CATALOGUE_SOURCE is equal to GOOGLE, all genres are scraped anyway
   PROVIDERS:
     RAPIDS:
-      COMPUTE: False
-      INCLUDE_EPISODE_FEATURES: False
-      SINGLE_CATEGORIES: ["all", "email"]
-      MULTIPLE_CATEGORIES:
-        social: ["socialnetworks", "socialmediatools"]
-        entertainment: ["entertainment", "gamingknowledge", "gamingcasual", "gamingadventure", "gamingstrategy", "gamingtoolscommunity", "gamingroleplaying", "gamingaction", "gaminglogic", "gamingsports", "gamingsimulation"]
-      SINGLE_APPS: ["top1global", "com.facebook.moments", "com.google.android.youtube", "com.twitter.android"] # There's no entropy for single apps
+      COMPUTE: True
+      INCLUDE_EPISODE_FEATURES: True
+      SINGLE_CATEGORIES: ["all", "socialnetworks", "messaging", "calling"]
+      MULTIPLE_CATEGORIES: 
+        none: ["socialnetworks"]
+      SINGLE_APPS: ["top1global"] # There's no entropy for single apps
       EXCLUDED_CATEGORIES: []
-      EXCLUDED_APPS: ["com.fitbit.FitbitMobile", "com.aware.plugin.upmc.cancer"]
+      EXCLUDED_APPS: []
       FEATURES: 
-        APP_EVENTS: ["count", "timeoffirstuse", "timeoflastuse", "frequencyentropy"]
-        APP_EPISODES: ["minduration", "maxduration", "meanduration", "sumduration"]
+        APP_EVENTS: ["count", "frequencyentropy"]
+        APP_EPISODES: ["maxduration", "sumduration"]
       IGNORE_EPISODES_SHORTER_THAN: 0 # in minutes, set to 0 to disable
       IGNORE_EPISODES_LONGER_THAN: 300 # in minutes, set to 0 to disable
       SRC_SCRIPT: src/features/phone_applications_foreground/rapids/main.py
@@ -151,7 +154,7 @@ PHONE_BLUETOOTH:
   CONTAINER: bluetooth
   PROVIDERS:
     RAPIDS:
-      COMPUTE: False
+      COMPUTE: True
       FEATURES: ["countscans", "uniquedevices", "countscansmostuniquedevice"]
       SRC_SCRIPT: src/features/phone_bluetooth/rapids/main.R
 
@@ -177,12 +180,12 @@ PHONE_CALLS:
   CONTAINER: calls
   PROVIDERS:
     RAPIDS:
-      COMPUTE: False
+      COMPUTE: True
       CALL_TYPES: [missed, incoming, outgoing]
       FEATURES:
-        missed:  [count, distinctcontacts, timefirstcall, timelastcall, countmostfrequentcontact]
-        incoming: [count, distinctcontacts, meanduration, sumduration, minduration, maxduration, stdduration, modeduration, entropyduration, timefirstcall, timelastcall, countmostfrequentcontact]
-        outgoing: [count, distinctcontacts, meanduration, sumduration, minduration, maxduration, stdduration, modeduration, entropyduration, timefirstcall, timelastcall, countmostfrequentcontact]
+        missed:  [count, distinctcontacts,countmostfrequentcontact]
+        incoming: [count, distinctcontacts, sumduration, maxduration, entropyduration, countmostfrequentcontact]
+        outgoing: [count, distinctcontacts, sumduration, maxduration, entropyduration, countmostfrequentcontact]
       SRC_SCRIPT: src/features/phone_calls/rapids/main.R
 
 # See https://www.rapids.science/latest/features/phone-conversation/
@@ -205,10 +208,10 @@ PHONE_CONVERSATION:
 
 # See https://www.rapids.science/latest/features/phone-data-yield/
 PHONE_DATA_YIELD:
-  SENSORS: []
+  SENSORS: [PHONE_ACCELEROMETER, PHONE_APPLICATIONS_FOREGROUND, PHONE_CALLS, PHONE_LOCATIONS, PHONE_SCREEN, PHONE_ACTIVITY_RECOGNITION, PHONE_LOG, PHONE_MESSAGES, PHONE_KEYBOARD]
   PROVIDERS:
     RAPIDS:
-      COMPUTE: False
+      COMPUTE: True
       FEATURES: [ratiovalidyieldedminutes, ratiovalidyieldedhours]
       MINUTE_RATIO_THRESHOLD_FOR_VALID_YIELDED_HOURS: 0.5 # 0 to 1, minimum percentage of valid minutes in an hour to be considered valid.
       SRC_SCRIPT: src/features/phone_data_yield/rapids/main.R
@@ -218,8 +221,8 @@ PHONE_KEYBOARD:
   CONTAINER: keyboard
   PROVIDERS:
     RAPIDS:
-      COMPUTE: False
-      FEATURES: ["sessioncount","averageinterkeydelay","averagesessionlength","changeintextlengthlessthanminusone","changeintextlengthequaltominusone","changeintextlengthequaltoone","changeintextlengthmorethanone","maxtextlength","lastmessagelength","totalkeyboardtouches"]
+      COMPUTE: True
+      FEATURES: ["sessioncount","averageinterkeydelay","averagesessionlength","maxtextlength","lastmessagelength","totalkeyboardtouches"]
       SRC_SCRIPT: src/features/phone_keyboard/rapids/main.py
 
 # See https://www.rapids.science/latest/features/phone-light/
@@ -240,19 +243,19 @@ PHONE_LOCATIONS:
   
   PROVIDERS:
     DORYAB:
-      COMPUTE: False
-      FEATURES: ["locationvariance","loglocationvariance","totaldistance","avgspeed","varspeed", "numberofsignificantplaces","numberlocationtransitions","radiusgyration","timeattop1location","timeattop2location","timeattop3location","movingtostaticratio","outlierstimepercent","maxlengthstayatclusters","minlengthstayatclusters","avglengthstayatclusters","stdlengthstayatclusters","locationentropy","normalizedlocationentropy","timeathome", "homelabel"]
-      ACCURACY_LIMIT: 100 # meters, drops location coordinates with an accuracy higher than this. This number means there's a 68% probability the true location is within this radius
+      COMPUTE: True
+      FEATURES: ["locationvariance","loglocationvariance","totaldistance","avgspeed","varspeed", "numberofsignificantplaces","numberlocationtransitions","radiusgyration","timeattop1location","timeattop2location","timeattop3location","movingtostaticratio","outlierstimepercent","maxlengthstayatclusters","minlengthstayatclusters","avglengthstayatclusters","stdlengthstayatclusters","locationentropy","normalizedlocationentropy","timeathome"]
+      ACCURACY_LIMIT: 200 # meters, drops location coordinates with an accuracy higher than this. This number means there's a 68% probability the true location is within this radius
       DBSCAN_EPS: 100 # meters
-      DBSCAN_MINSAMPLES: 5
+      DBSCAN_MINSAMPLES: 3
       THRESHOLD_STATIC : 1 # km/h
       MAXIMUM_ROW_GAP: 300 # seconds
       MINUTES_DATA_USED: False
       CLUSTER_ON: PARTICIPANT_DATASET # PARTICIPANT_DATASET, TIME_SEGMENT, TIME_SEGMENT_INSTANCE
-      INFER_HOME_LOCATION_STRATEGY: DORYAB_STRATEGY # DORYAB_STRATEGY, SUN_LI_VEGA_STRATEGY
+      INFER_HOME_LOCATION_STRATEGY: SUN_LI_VEGA_STRATEGY # DORYAB_STRATEGY, SUN_LI_VEGA_STRATEGY
       MINIMUM_DAYS_TO_DETECT_HOME_CHANGES: 3
-      CLUSTERING_ALGORITHM: DBSCAN # DBSCAN, OPTICS
-      RADIUS_FOR_HOME: 100
+      CLUSTERING_ALGORITHM: OPTICS # DBSCAN, OPTICS
+      RADIUS_FOR_HOME: 200
       SRC_SCRIPT: src/features/phone_locations/doryab/main.py
 
     BARNETT:
@@ -269,13 +272,18 @@ PHONE_LOG:
     ANDROID: aware_log
     IOS: ios_aware_log
   PROVIDERS: # None implemented yet but this sensor can be used in PHONE_DATA_YIELD
+    DEMMI:
+      COMPUTE: True
+      FEATURES: []
+      MOOD_LOGS: "data/interim/{pid}/mood_logs.csv"
+      SRC_SCRIPT: src/features/phone_log/demmi/main.R
 
 # See https://www.rapids.science/latest/features/phone-messages/
 PHONE_MESSAGES:
   CONTAINER: messages
   PROVIDERS:
     RAPIDS:
-      COMPUTE: False
+      COMPUTE: True
       MESSAGES_TYPES : [received, sent]
       FEATURES: 
         received: [count, distinctcontacts, timefirstmessage, timelastmessage, countmostfrequentcontact]
@@ -287,11 +295,11 @@ PHONE_SCREEN:
   CONTAINER: screen
   PROVIDERS:
     RAPIDS:
-      COMPUTE: False
+      COMPUTE: True
       REFERENCE_HOUR_FIRST_USE: 0
       IGNORE_EPISODES_SHORTER_THAN: 0 # in minutes, set to 0 to disable
       IGNORE_EPISODES_LONGER_THAN: 0 # in minutes, set to 0 to disable
-      FEATURES: ["countepisode", "sumduration", "maxduration", "minduration", "avgduration", "stdduration", "firstuseafter"] # "episodepersensedminutes" needs to be added later
+      FEATURES: ["countepisode", "sumduration", "maxduration", "avgduration", "firstuseafter"] # "episodepersensedminutes" needs to be added later
       EPISODE_TYPES: ["unlock"]
       SRC_SCRIPT: src/features/phone_screen/rapids/main.py
 

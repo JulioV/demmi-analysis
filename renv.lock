@@ -114,6 +114,13 @@
       "Repository": "CRAN",
       "Hash": "ddfa72a87fdf4c80466a20818be91d00"
     },
+    "SingleCaseES": {
+      "Package": "SingleCaseES",
+      "Version": "0.5.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "2a489aece20ce171399bbec1e258cf40"
+    },
     "abind": {
       "Package": "abind",
       "Version": "1.4-5",

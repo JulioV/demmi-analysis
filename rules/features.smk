@@ -198,7 +198,9 @@ rule phone_log_r_features:
         provider_key = "{provider_key}",
         sensor_key = "phone_log"
     output:
-        "data/interim/{pid}/phone_log_features/phone_log_r_{provider_key}.csv"
+        "data/interim/{pid}/phone_log_features/phone_log_r_{provider_key}.csv",
+        "data/interim/{pid}/phone_log_features/mood_logs_{provider_key}.csv",
+        "data/interim/{pid}/phone_log_features/episode_logs_{provider_key}.csv",
     script:
         "../src/features/entry.R"
 
